@@ -1,4 +1,5 @@
 import { getFramePath, type TransitionAsset } from '../data/assets'
+import { fetchAssetWithRetry } from './assetLoading'
 
 interface SequenceState {
   abortController: AbortController
@@ -43,10 +44,9 @@ export class FrameSequenceStore {
         const frame = cursor
         cursor += 1
         try {
-          const response = await fetch(getFramePath(asset, frame), {
+          const response = await fetchAssetWithRetry(getFramePath(asset, frame), {
             signal: state.abortController.signal,
           })
-          if (!response.ok) throw new Error(`HTTP ${response.status}`)
           state.blobs.set(frame, await response.blob())
         } catch (error) {
           if (!state.abortController.signal.aborted) {

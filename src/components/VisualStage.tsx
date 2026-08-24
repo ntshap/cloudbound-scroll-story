@@ -8,6 +8,11 @@ import {
   type TransitionAsset,
 } from '../data/assets'
 import { scenes } from '../data/scenes'
+import {
+  clearMediaRetry,
+  preloadImageWithRetry,
+  retryMediaElement,
+} from '../lib/assetLoading'
 import { FrameSequenceStore } from '../lib/FrameSequenceStore'
 import { LoadingScreen } from './LoadingScreen'
 
@@ -41,15 +46,6 @@ function waitForVideo(video: HTMLVideoElement) {
     const timeout = window.setTimeout(finish, 8000)
     video.addEventListener('loadeddata', finish, { once: true })
     video.addEventListener('error', finish, { once: true })
-  })
-}
-
-function preloadImage(source: string) {
-  return new Promise<void>((resolve) => {
-    const image = new Image()
-    image.onload = () => resolve()
-    image.onerror = () => resolve()
-    image.src = source
   })
 }
 
@@ -417,7 +413,10 @@ export function VisualStage({
     const initialize = async () => {
       textRefs.current = Array.from(document.querySelectorAll<HTMLElement>('[data-scene-copy]'))
       if (lightweight) {
-        await Promise.all([preloadImage(scenes[0].still), preloadImage(scenes[1].still)])
+        await Promise.all([
+          preloadImageWithRetry(scenes[0].still),
+          preloadImageWithRetry(scenes[1].still),
+        ])
       } else {
         const heroVideo = videoRefs.current[0]
         if (heroVideo) {
@@ -525,6 +524,10 @@ export function VisualStage({
               alt=""
               loading={index < 2 ? 'eager' : 'lazy'}
               style={{ opacity: index === 0 ? 1 : 0 }}
+              onLoad={(event) => clearMediaRetry(event.currentTarget)}
+              onError={(event) => {
+                retryMediaElement(event.currentTarget, scene.still)
+              }}
             />
           ))}
         </div>
@@ -542,10 +545,12 @@ export function VisualStage({
             playsInline
             preload={index < 2 ? 'auto' : 'metadata'}
             style={{ opacity: index === 0 ? 1 : 0 }}
-            onError={() => {
+            onLoadedData={(event) => clearMediaRetry(event.currentTarget)}
+            onError={(event) => {
               idlePreparing.current[index] = false
               idleReady.current[index] = false
               needsRender.current = true
+              retryMediaElement(event.currentTarget, scene.idle)
             }}
           />
         ))}

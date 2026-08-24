@@ -13,3 +13,9 @@
 - [x] Emit `dist/index.js` for the platform production startup without changing the Cloudbound experience.
 - [x] Verify preview access, `dist/public` upload output, and the production server on port 3000.
 - [x] Save a corrected checkpoint for automatic redeployment.
+- [x] Investigate the user-reported transient `ERR_NETWORK_CHANGED` for `/assets/stills/03-workshop.png`; confirm repeated live re-probes return the original PNG with HTTP 200, and classify `sr-client-cfg.amplitude.com` / `api2.amplitude.com` failures as extension-origin requests not issued by Cloudbound.
+- [x] Trace all still, idle, fallback-video, and transition-frame URLs through the deployed serving layer; all 326 live URLs return HTTP 200.
+- [x] Apply bounded cache-busting retries for transient image, video, and frame fetch failures, and prevent caching of expiring signed redirects without renaming or re-encoding media.
+- [x] Restore `/assets/...` managed-storage redirects in Vite preview so verification uses real media rather than the SPA HTML fallback.
+- [x] Verify the loader, workshop still, reversible transitions, chapter progression, final scene, and Cloudbound-owned console/network requests against the production-equivalent preview.
+- [ ] Save and auto-publish the corrected deployment checkpoint.

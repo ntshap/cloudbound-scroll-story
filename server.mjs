@@ -35,7 +35,7 @@ async function redirectAsset(requestPath, response) {
   const { url } = await result.json()
   response.writeHead(307, {
     Location: url,
-    'Cache-Control': 'public, max-age=31536000, immutable',
+    'Cache-Control': 'no-store',
   }).end()
 }
 
