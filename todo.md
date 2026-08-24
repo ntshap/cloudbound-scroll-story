@@ -5,4 +5,4 @@
 - [x] Preserve every original filename and encoding; do not rewrite `/assets/...` paths if managed storage serves that base.
 - [x] Remove checkpoint-blocking duplicate local/build media only after confirming the managed copy is usable.
 - [x] Rebuild and visually verify the loader, hero, frame-scrub transitions, chapter counter, and final scene.
-- [ ] Save the final checkpoint and report the verified count, serving base URL, and publishing URL/instructions.
+- [x] Save the final checkpoint and report the verified count, serving base URL, and publishing URL/instructions.
