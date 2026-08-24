@@ -4,7 +4,7 @@ import { createServer } from 'node:http'
 import path from 'node:path'
 import { fileURLToPath } from 'node:url'
 
-const root = path.join(path.dirname(fileURLToPath(import.meta.url)), 'dist')
+const root = path.join(path.dirname(fileURLToPath(import.meta.url)), 'public')
 const port = Number(process.env.PORT || 3000)
 const forgeUrl = process.env.BUILT_IN_FORGE_API_URL?.replace(/\/+$/, '')
 const forgeKey = process.env.BUILT_IN_FORGE_API_KEY
@@ -78,4 +78,3 @@ createServer(async (request, response) => {
 }).listen(port, () => {
   console.log(`Cloudbound server listening on port ${port}`)
 })
-

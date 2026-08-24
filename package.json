@@ -5,10 +5,10 @@
   "type": "module",
   "scripts": {
     "dev": "vite --host",
-    "build": "tsc -b && vite build",
+    "build": "tsc -b && vite build && cp server.mjs dist/index.js",
     "check": "tsc -b",
     "preview": "vite preview",
-    "start": "node server.mjs"
+    "start": "node dist/index.js"
   },
   "dependencies": {
     "@gsap/react": "^2.1.2",
