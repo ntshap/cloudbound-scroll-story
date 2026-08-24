@@ -8,4 +8,4 @@
 - [x] Save the final checkpoint and report the verified count, serving base URL, and publishing URL/instructions.
 - [x] Replace `vite.config.ts` with the exact requested `dist/public` output configuration and change nothing else.
 - [x] Confirm the production build emits `dist/public/index.html` and bundled assets.
-- [ ] Save a corrected publish-ready checkpoint for redeployment.
+- [x] Save a corrected publish-ready checkpoint for redeployment.
