@@ -18,4 +18,4 @@
 - [x] Apply bounded cache-busting retries for transient image, video, and frame fetch failures, and prevent caching of expiring signed redirects without renaming or re-encoding media.
 - [x] Restore `/assets/...` managed-storage redirects in Vite preview so verification uses real media rather than the SPA HTML fallback.
 - [x] Verify the loader, workshop still, reversible transitions, chapter progression, final scene, and Cloudbound-owned console/network requests against the production-equivalent preview.
-- [ ] Save and auto-publish the corrected deployment checkpoint.
+- [x] Save and auto-publish the corrected deployment checkpoint.
