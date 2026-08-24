@@ -12,4 +12,4 @@
 - [x] Allow the Manus preview hostname in Vite while preserving `build.outDir: 'dist/public'`.
 - [x] Emit `dist/index.js` for the platform production startup without changing the Cloudbound experience.
 - [x] Verify preview access, `dist/public` upload output, and the production server on port 3000.
-- [ ] Save a corrected checkpoint for automatic redeployment.
+- [x] Save a corrected checkpoint for automatic redeployment.
