@@ -26,5 +26,6 @@
 - [x] Ensure failed frames receive three bounded attempts with backoff and missing frames are re-queued when a sequence is loaded again.
 - [x] Add focused Vitest coverage for transient retries, three-attempt 404 exhaustion, and second-pass missing-frame repair behavior.
 - [x] Verify every one of the 326 new direct-stream responses is HTTP 200 with zero redirects, immutable one-year caching, no content encoding, and byte-identical to the corresponding archive entry.
+- [x] Notify every caller of frame-load progress even when it joins an already-running sequence request, so newly arrived exact frames trigger redraws during fast scrolling.
 - [ ] Redeploy and repeat the full-scroll measurement with a cold cache, confirming zero non-200 frame responses and smooth reversible playback.
 - [ ] Report the before-and-after measurements, any exact failing URLs/statuses, and the live deployment URL.

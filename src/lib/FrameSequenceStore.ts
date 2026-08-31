@@ -7,6 +7,7 @@ interface SequenceState {
   decoded: Map<number, ImageBitmap>
   decodeRequests: Map<number, Promise<ImageBitmap>>
   loadRequest?: Promise<LoadResult>
+  progressListeners: Set<(progress: number) => void>
 }
 
 export interface LoadResult {
@@ -34,7 +35,15 @@ export class FrameSequenceStore {
       onProgress?.(1)
       return Promise.resolve({ loaded: state.blobs.size, total: asset.frameCount, errors: [] })
     }
-    if (state.loadRequest) return state.loadRequest
+    if (onProgress) {
+      state.progressListeners.add(onProgress)
+      onProgress(state.blobs.size / asset.frameCount)
+    }
+    if (state.loadRequest) {
+      return state.loadRequest.finally(() => {
+        if (onProgress) state.progressListeners.delete(onProgress)
+      })
+    }
 
     const missingFrames: number[] = []
     for (let frame = asset.frameStart; frame < asset.frameStart + asset.frameCount; frame += 1) {
@@ -46,8 +55,11 @@ export class FrameSequenceStore {
     }
 
     let cursor = 0
-    let completed = 0
     const errors: number[] = []
+    const reportProgress = () => {
+      const progress = state.blobs.size / asset.frameCount
+      for (const listener of state.progressListeners) listener(progress)
+    }
     const worker = async () => {
       while (cursor < missingFrames.length) {
         const frame = missingFrames[cursor]
@@ -63,8 +75,7 @@ export class FrameSequenceStore {
             console.warn(`Unable to load transition frame ${frame}`, error)
           }
         } finally {
-          completed += 1
-          onProgress?.(completed / missingFrames.length)
+          reportProgress()
         }
       }
     }
@@ -77,7 +88,9 @@ export class FrameSequenceStore {
         state.loadRequest = undefined
       })
 
-    return state.loadRequest
+    return state.loadRequest.finally(() => {
+      if (onProgress) state.progressListeners.delete(onProgress)
+    })
   }
 
   async decode(index: number, frame: number) {
@@ -165,6 +178,7 @@ export class FrameSequenceStore {
     state.blobs.clear()
     state.decoded.clear()
     state.decodeRequests.clear()
+    state.progressListeners.clear()
     this.sequences.delete(index)
   }
 
@@ -180,6 +194,7 @@ export class FrameSequenceStore {
         blobs: new Map(),
         decoded: new Map(),
         decodeRequests: new Map(),
+        progressListeners: new Set(),
       }
       this.sequences.set(index, state)
     }

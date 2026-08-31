@@ -45,4 +45,35 @@ describe('FrameSequenceStore repair loading', () => {
       '/assets/transitions/test-transition/frame_000001.webp',
     )
   })
+
+  it('notifies a caller that joins an already-running sequence load', async () => {
+    const fetchMock = vi.mocked(fetchAssetWithRetry)
+    const resolvers = new Map<string, (response: Response) => void>()
+    fetchMock.mockImplementation(
+      async (source) =>
+        new Promise<Response>((resolve) => {
+          resolvers.set(String(source), resolve)
+        }),
+    )
+
+    const store = new FrameSequenceStore([transition])
+    const initialLoad = store.load(0)
+    await vi.waitFor(() => expect(fetchMock).toHaveBeenCalledTimes(3))
+
+    const progress: number[] = []
+    const joinedLoad = store.load(0, (value) => progress.push(value))
+    resolvers.get('/assets/transitions/test-transition/frame_000001.webp')?.(
+      new Response('frame-1', { status: 200 }),
+    )
+    await vi.waitFor(() => expect(progress).toContain(1 / 3))
+    resolvers.get('/assets/transitions/test-transition/frame_000002.webp')?.(
+      new Response('frame-2', { status: 200 }),
+    )
+    resolvers.get('/assets/transitions/test-transition/frame_000003.webp')?.(
+      new Response('frame-3', { status: 200 }),
+    )
+
+    await Promise.all([initialLoad, joinedLoad])
+    expect(progress.at(-1)).toBe(1)
+  })
 })

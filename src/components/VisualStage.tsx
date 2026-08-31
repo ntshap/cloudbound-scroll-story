@@ -223,7 +223,9 @@ export function VisualStage({
           ? transition.frameStart
           : transition.frameStart + transition.frameCount - 1
       void store
-        .load(transitionIndex)
+        .load(transitionIndex, () => {
+          needsRender.current = true
+        })
         .then((result) => {
           if (result.loaded === 0) failedSequences.current.add(transitionIndex)
           return store.decodeWindow(transitionIndex, boundaryFrame, 10)
