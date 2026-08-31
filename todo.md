@@ -19,3 +19,12 @@
 - [x] Restore `/assets/...` managed-storage redirects in Vite preview so verification uses real media rather than the SPA HTML fallback.
 - [x] Verify the loader, workshop still, reversible transitions, chapter progression, final scene, and Cloudbound-owned console/network requests against the production-equivalent preview.
 - [x] Save and auto-publish the corrected deployment checkpoint.
+- [x] Measure the current live full-scroll frame requests before changes: 312 canonical frame requests, zero non-200 responses, HTTP/2, canonical 307 redirects cached for 4 hours, final frame/video objects cached for one year, and a largest sequence of 78 frames / 97,995,034 bytes.
+- [x] Report the baseline measurements before modifying the delivery or loader implementation.
+- [ ] Serve all stills, idles, transition frames, and fallback videos directly from canonical immutable URLs with HTTP/2 or HTTP/3, no redirects, no compression, no throttling, and byte-range video support.
+- [x] Preserve all 326 original media files without renaming, thinning, re-encoding, downscaling, or substitution; direct delivery remains byte-identical to the supplied source.
+- [x] Ensure failed frames receive three bounded attempts with backoff and missing frames are re-queued when a sequence is loaded again.
+- [x] Add focused Vitest coverage for transient retries, three-attempt 404 exhaustion, and second-pass missing-frame repair behavior.
+- [x] Verify every one of the 326 new direct-stream responses is HTTP 200 with zero redirects, immutable one-year caching, no content encoding, and byte-identical to the corresponding archive entry.
+- [ ] Redeploy and repeat the full-scroll measurement with a cold cache, confirming zero non-200 frame responses and smooth reversible playback.
+- [ ] Report the before-and-after measurements, any exact failing URLs/statuses, and the live deployment URL.

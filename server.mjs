@@ -2,6 +2,7 @@ import { createReadStream } from 'node:fs'
 import { stat } from 'node:fs/promises'
 import { createServer } from 'node:http'
 import path from 'node:path'
+import { Readable } from 'node:stream'
 import { fileURLToPath } from 'node:url'
 
 const root = path.join(path.dirname(fileURLToPath(import.meta.url)), 'public')
@@ -15,10 +16,13 @@ const mime = new Map([
   ['.js', 'text/javascript; charset=utf-8'],
   ['.json', 'application/json; charset=utf-8'],
   ['.map', 'application/json; charset=utf-8'],
+  ['.mp4', 'video/mp4'],
+  ['.png', 'image/png'],
   ['.svg', 'image/svg+xml'],
+  ['.webp', 'image/webp'],
 ])
 
-async function redirectAsset(requestPath, response) {
+async function serveManagedAsset(request, requestPath, response) {
   if (!forgeUrl || !forgeKey) {
     response.writeHead(500).end('Managed File Storage is unavailable')
     return
@@ -33,10 +37,34 @@ async function redirectAsset(requestPath, response) {
     return
   }
   const { url } = await result.json()
-  response.writeHead(307, {
-    Location: url,
-    'Cache-Control': 'no-store',
-  }).end()
+  const range = request.headers.range
+  const upstream = await fetch(url, {
+    method: request.method === 'HEAD' ? 'HEAD' : 'GET',
+    headers: range ? { Range: range } : undefined,
+  })
+  if (!upstream.ok && upstream.status !== 206) {
+    response.writeHead(upstream.status).end('Unable to retrieve managed asset')
+    return
+  }
+
+  const headers = {
+    'Accept-Ranges': upstream.headers.get('accept-ranges') || 'bytes',
+    'Cache-Control': 'public, max-age=31536000, immutable',
+    'Content-Type': upstream.headers.get('content-type') || mime.get(path.extname(requestPath)) || 'application/octet-stream',
+  }
+  const contentLength = upstream.headers.get('content-length')
+  const contentRange = upstream.headers.get('content-range')
+  const etag = upstream.headers.get('etag')
+  if (contentLength) headers['Content-Length'] = contentLength
+  if (contentRange) headers['Content-Range'] = contentRange
+  if (etag) headers.ETag = etag
+
+  response.writeHead(upstream.status, headers)
+  if (request.method === 'HEAD' || !upstream.body) {
+    response.end()
+    return
+  }
+  Readable.fromWeb(upstream.body).pipe(response)
 }
 
 async function serveFile(absolute, response) {
@@ -59,7 +87,7 @@ createServer(async (request, response) => {
   try {
     const requestPath = new URL(request.url || '/', 'http://localhost').pathname
     if (requestPath.startsWith('/assets/')) {
-      await redirectAsset(requestPath, response)
+      await serveManagedAsset(request, requestPath, response)
       return
     }
 

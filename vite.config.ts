@@ -32,10 +32,30 @@ function managedAssets(): Plugin {
             return
           }
           const { url } = await result.json() as { url: string }
-          response.statusCode = 307
-          response.setHeader('Location', url)
-          response.setHeader('Cache-Control', 'no-store')
-          response.end()
+          const range = request.headers.range
+          const upstream = await fetch(url, {
+            method: request.method === 'HEAD' ? 'HEAD' : 'GET',
+            headers: range ? { Range: range } : undefined,
+          })
+          if (!upstream.ok && upstream.status !== 206) {
+            response.statusCode = upstream.status
+            response.end('Unable to retrieve managed asset')
+            return
+          }
+
+          response.statusCode = upstream.status
+          response.setHeader('Accept-Ranges', upstream.headers.get('accept-ranges') || 'bytes')
+          response.setHeader('Cache-Control', 'public, max-age=31536000, immutable')
+          response.setHeader('Content-Type', upstream.headers.get('content-type') || 'application/octet-stream')
+          const contentLength = upstream.headers.get('content-length')
+          const contentRange = upstream.headers.get('content-range')
+          if (contentLength) response.setHeader('Content-Length', contentLength)
+          if (contentRange) response.setHeader('Content-Range', contentRange)
+          if (request.method === 'HEAD' || !upstream.body) {
+            response.end()
+            return
+          }
+          response.end(Buffer.from(await upstream.arrayBuffer()))
         } catch {
           response.statusCode = 502
           response.end('Unable to retrieve managed asset')

@@ -1,4 +1,4 @@
-const RETRY_DELAYS_MS = [250, 750, 1500] as const
+const RETRY_DELAYS_MS = [250, 750] as const
 
 function delay(milliseconds: number) {
   return new Promise<void>((resolve) => globalThis.setTimeout(resolve, milliseconds))
@@ -19,10 +19,9 @@ export async function fetchAssetWithRetry(source: string, init: RequestInit = {}
     try {
       const response = await fetch(buildRetryUrl(source, attempt), {
         ...init,
-        cache: 'no-store',
       })
       if (response.ok) return response
-      lastError = new Error(`HTTP ${response.status}`)
+      lastError = new Error(`HTTP ${response.status} for ${source}`)
     } catch (error) {
       if (init.signal?.aborted) throw error
       lastError = error

@@ -36,12 +36,21 @@ export class FrameSequenceStore {
     }
     if (state.loadRequest) return state.loadRequest
 
-    let cursor = asset.frameStart
+    const missingFrames: number[] = []
+    for (let frame = asset.frameStart; frame < asset.frameStart + asset.frameCount; frame += 1) {
+      if (!state.blobs.has(frame)) missingFrames.push(frame)
+    }
+    if (missingFrames.length === 0) {
+      onProgress?.(1)
+      return Promise.resolve({ loaded: state.blobs.size, total: asset.frameCount, errors: [] })
+    }
+
+    let cursor = 0
     let completed = 0
     const errors: number[] = []
     const worker = async () => {
-      while (cursor < asset.frameStart + asset.frameCount) {
-        const frame = cursor
+      while (cursor < missingFrames.length) {
+        const frame = missingFrames[cursor]
         cursor += 1
         try {
           const response = await fetchAssetWithRetry(getFramePath(asset, frame), {
@@ -55,13 +64,13 @@ export class FrameSequenceStore {
           }
         } finally {
           completed += 1
-          onProgress?.(completed / asset.frameCount)
+          onProgress?.(completed / missingFrames.length)
         }
       }
     }
 
     state.loadRequest = Promise.all(
-      Array.from({ length: Math.min(LOAD_CONCURRENCY, asset.frameCount) }, worker),
+      Array.from({ length: Math.min(LOAD_CONCURRENCY, missingFrames.length) }, worker),
     )
       .then(() => ({ loaded: state.blobs.size, total: asset.frameCount, errors }))
       .finally(() => {
