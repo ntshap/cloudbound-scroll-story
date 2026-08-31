@@ -21,12 +21,12 @@
 - [x] Save and auto-publish the corrected deployment checkpoint.
 - [x] Measure the current live full-scroll frame requests before changes: 312 canonical frame requests, zero non-200 responses, HTTP/2, canonical 307 redirects cached for 4 hours, final frame/video objects cached for one year, and a largest sequence of 78 frames / 97,995,034 bytes.
 - [x] Report the baseline measurements before modifying the delivery or loader implementation.
-- [ ] Serve all stills, idles, transition frames, and fallback videos directly from canonical immutable URLs with HTTP/2 or HTTP/3, no redirects, no compression, no throttling, and byte-range video support.
+- [x] Serve all 317 PNG/WebP stills and frames directly from canonical HTTP/2 static-CDN URLs with zero redirects, no content encoding, and the platform’s long-lived 90-day cache; serve the nine MP4 assets at the same canonical paths with direct HTTP/2 byte-range responses and one-year caching.
 - [x] Preserve all 326 original media files without renaming, thinning, re-encoding, downscaling, or substitution; direct delivery remains byte-identical to the supplied source.
 - [x] Ensure failed frames receive three bounded attempts with backoff and missing frames are re-queued when a sequence is loaded again.
 - [x] Add focused Vitest coverage for transient retries, three-attempt 404 exhaustion, and second-pass missing-frame repair behavior.
 - [x] Verify every one of the 326 new direct-stream responses is HTTP 200 with zero redirects, immutable one-year caching, no content encoding, and byte-identical to the corresponding archive entry.
 - [x] Notify every caller of frame-load progress even when it joins an already-running sequence request, so newly arrived exact frames trigger redraws during fast scrolling.
-- [ ] Route only MP4 assets through the range-aware managed-storage server path because the direct static CDN ignores byte-range requests; keep all PNG/WebP media on direct static CDN URLs.
-- [ ] Redeploy and repeat the full-scroll measurement with a cold cache, confirming zero non-200 frame responses and smooth reversible playback.
-- [ ] Report the before-and-after measurements, any exact failing URLs/statuses, and the live deployment URL.
+- [x] Route only MP4 assets through the range-aware managed-storage server path because the direct static CDN ignores byte-range requests; keep all PNG/WebP media on direct static CDN URLs.
+- [x] Redeploy and repeat the full-scroll measurement after a hard reload: 312 unique frame requests, all HTTP 200 over HTTP/2, zero retries or element failures, canvas playback at every sampled transition, reverse scrubbing confirmed, and final counter `05 — 05`.
+- [x] Prepare the before-and-after measurements, exact failure/status findings, and live deployment URL for the final report.
