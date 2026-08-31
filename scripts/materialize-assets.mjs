@@ -53,14 +53,16 @@ async function hashFile(filename) {
 
 async function extractVerifiedMedia(archivePath) {
   const directory = await unzipper.Open.file(archivePath)
-  const files = directory.files.filter(
+  const mediaFiles = directory.files.filter(
     (entry) =>
       entry.type === 'File' &&
       /^assets\/(stills|idles|transitions)\/.+\.(png|mp4|webp)$/.test(entry.path),
   )
-  if (files.length !== 326) {
-    throw new Error(`Expected 326 Cloudbound media files, found ${files.length}`)
+  if (mediaFiles.length !== 326) {
+    throw new Error(`Expected 326 Cloudbound media files, found ${mediaFiles.length}`)
   }
+  const files = mediaFiles.filter((entry) => !entry.path.endsWith('.mp4'))
+  if (files.length !== 317) throw new Error(`Expected 317 static PNG/WebP files, found ${files.length}`)
 
   const assetRoot = path.join(outputRoot, 'assets')
   await Promise.all(
@@ -87,7 +89,7 @@ try {
     throw new Error(`Cloudbound archive checksum mismatch: ${archiveHash}`)
   }
   await extractVerifiedMedia(archivePath)
-  console.log('Materialized 326 checksum-verified Cloudbound media files into dist/public/assets')
+  console.log('Verified 326 Cloudbound media files and materialized 317 PNG/WebP files into dist/public/assets')
 } finally {
   if (!useLocalArchive) await rm(temporaryArchive, { force: true })
 }
