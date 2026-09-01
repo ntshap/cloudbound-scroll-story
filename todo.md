@@ -40,6 +40,6 @@
 - [x] Keep the 326 optimized files committed under `public/assets/` while excluding only MP4 copies from `dist/public` so the platform static edge cannot swallow Range headers.
 - [x] Serve canonical MP4 paths from the committed `public/assets/` disk files through the existing generic static server, without `serveManagedVideo`, Managed File Storage, presigned URLs, downloads, re-encoding, or path changes.
 - [x] Pass six Vitest checks, TypeScript validation, the production build, all 326 local content-type checks, and all nine local MP4 byte-range checks.
-- [ ] Rebuild, redeploy, and re-audit all 326 canonical URLs for HTTP 200/correct content types and all nine MP4s for HTTP 206/valid `Content-Range`.
-- [ ] Verify all four transitions play completely forward and backward using the unchanged `d248ae8` loader code.
-- [ ] Report replacement commit `57e39d55548bac90785b8b44a810f63c0203ba37`, the deployment checkpoint, and exhaustive live results.
+- [x] Rebuild, redeploy, and re-audit all 326 canonical URLs for HTTP 200/correct content types and all nine MP4s for HTTP 206/valid `Content-Range`; zero failures.
+- [x] Verify all four transitions play completely forward and backward on canvas using the unchanged `d248ae8` loader code, with the loader ready and final counter `05 — 05`.
+- [x] Prepare `deployment-verification-d248ae8.md` covering replacement commit `57e39d55548bac90785b8b44a810f63c0203ba37`, deployment checkpoint `483d4cc6`, and exhaustive live results.
