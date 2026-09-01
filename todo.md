@@ -30,3 +30,7 @@
 - [x] Route only MP4 assets through the range-aware managed-storage server path because the direct static CDN ignores byte-range requests; keep all PNG/WebP media on direct static CDN URLs.
 - [x] Redeploy and repeat the full-scroll measurement after a hard reload: 312 unique frame requests, all HTTP 200 over HTTP/2, zero retries or element failures, canvas playback at every sampled transition, reverse scrubbing confirmed, and final counter `05 — 05`.
 - [x] Prepare the before-and-after measurements, exact failure/status findings, and live deployment URL for the final report.
+- [x] Reproduce the reported `sr-client-cfg.amplitude.com` 403 and `api2.amplitude.com` 400 response classes and identify the externally injected Manus dispatcher/editor runtime as the initiator.
+- [x] Search Cloudbound source and the deployed production bundle for any Amplitude SDK, endpoint, or analytics configuration reference; no matches exist.
+- [x] Verify there is no Cloudbound-owned Amplitude integration to remove and that the requests are injected by the Manus edge dispatcher/editor runtime.
+- [x] Confirm the public Cloudbound deployment has no application-owned network failures and document that the invalid platform analytics key must be corrected by Manus rather than application code.
