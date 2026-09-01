@@ -5,7 +5,7 @@
   "type": "module",
   "scripts": {
     "dev": "vite --host",
-    "build": "tsc -b && vite build && node scripts/materialize-assets.mjs && cp server.mjs dist/index.js",
+    "build": "tsc -b && vite build && cp server.mjs dist/index.js",
     "check": "tsc -b",
     "preview": "vite preview",
     "start": "node dist/index.js",

@@ -164,12 +164,36 @@ export class FrameSequenceStore {
     return Boolean(asset && this.sequences.get(index)?.blobs.size === asset.frameCount)
   }
 
+  /**
+   * Frees the decoded bitmaps of distant sequences but keeps their downloaded
+   * bytes.
+   *
+   * The two caches cost wildly different amounts. A decoded frame is raw RGBA —
+   * megabytes each, which is what MAX_DECODED_FRAMES exists to bound. A blob is
+   * the compressed file, a couple of hundred KB. Dropping blobs to save memory
+   * therefore buys very little and costs a full re-download of the sequence,
+   * which is what made a revisited transition stall: every frame had to come
+   * over the network again, and an in-flight download was aborted outright.
+   *
+   * Distant sequences now give back their bitmaps and keep their bytes, so a
+   * frame downloaded once in a session is never fetched twice.
+   */
   releaseDistant(center: number, distance = 1) {
     for (const index of this.sequences.keys()) {
-      if (Math.abs(index - center) > distance) this.release(index)
+      if (Math.abs(index - center) > distance) this.releaseDecoded(index)
     }
   }
 
+  /** Drops decoded bitmaps only; the sequence stays resident and re-decodes on demand. */
+  releaseDecoded(index: number) {
+    const state = this.sequences.get(index)
+    if (!state) return
+    for (const bitmap of state.decoded.values()) bitmap.close()
+    state.decoded.clear()
+    state.decodeRequests.clear()
+  }
+
+  /** Full teardown including downloaded bytes. Unmount only. */
   release(index: number) {
     const state = this.sequences.get(index)
     if (!state) return

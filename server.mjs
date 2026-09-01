@@ -2,13 +2,10 @@ import { createReadStream } from 'node:fs'
 import { stat } from 'node:fs/promises'
 import { createServer } from 'node:http'
 import path from 'node:path'
-import { Readable } from 'node:stream'
 import { fileURLToPath } from 'node:url'
 
 const root = path.join(path.dirname(fileURLToPath(import.meta.url)), 'public')
 const port = Number(process.env.PORT || 3000)
-const forgeUrl = process.env.BUILT_IN_FORGE_API_URL?.replace(/\/+$/, '')
-const forgeKey = process.env.BUILT_IN_FORGE_API_KEY
 const mime = new Map([
   ['.css', 'text/css; charset=utf-8'],
   ['.html', 'text/html; charset=utf-8'],
@@ -21,53 +18,6 @@ const mime = new Map([
   ['.svg', 'image/svg+xml'],
   ['.webp', 'image/webp'],
 ])
-
-async function serveManagedVideo(request, requestPath, response) {
-  if (!forgeUrl || !forgeKey) {
-    response.writeHead(500).end('Managed File Storage is unavailable')
-    return
-  }
-
-  const presign = new URL('v1/storage/presign/get', `${forgeUrl}/`)
-  presign.searchParams.set('path', requestPath.slice(1))
-  const result = await fetch(presign, {
-    headers: { Authorization: `Bearer ${forgeKey}` },
-  })
-  if (!result.ok) {
-    response.writeHead(502).end('Unable to retrieve managed video')
-    return
-  }
-
-  const { url } = await result.json()
-  const range = request.headers.range
-  const upstream = await fetch(url, {
-    method: request.method === 'HEAD' ? 'HEAD' : 'GET',
-    headers: range ? { Range: range } : undefined,
-  })
-  if (!upstream.ok && upstream.status !== 206) {
-    response.writeHead(upstream.status).end('Unable to retrieve managed video')
-    return
-  }
-
-  const headers = {
-    'Accept-Ranges': upstream.headers.get('accept-ranges') || 'bytes',
-    'Cache-Control': 'public, max-age=31536000, immutable',
-    'Content-Type': upstream.headers.get('content-type') || 'video/mp4',
-  }
-  const contentLength = upstream.headers.get('content-length')
-  const contentRange = upstream.headers.get('content-range')
-  const etag = upstream.headers.get('etag')
-  if (contentLength) headers['Content-Length'] = contentLength
-  if (contentRange) headers['Content-Range'] = contentRange
-  if (etag) headers.ETag = etag
-
-  response.writeHead(upstream.status, headers)
-  if (request.method === 'HEAD' || !upstream.body) {
-    response.end()
-    return
-  }
-  Readable.fromWeb(upstream.body).pipe(response)
-}
 
 async function serveFile(absolute, request, response) {
   try {
@@ -108,10 +58,6 @@ async function serveFile(absolute, request, response) {
 createServer(async (request, response) => {
   try {
     const requestPath = new URL(request.url || '/', 'http://localhost').pathname
-    if (requestPath.startsWith('/assets/') && requestPath.endsWith('.mp4')) {
-      await serveManagedVideo(request, requestPath, response)
-      return
-    }
     const relative = decodeURIComponent(requestPath).replace(/^\/+/, '')
     const candidate = path.resolve(root, relative || 'index.html')
     if (!candidate.startsWith(root)) {

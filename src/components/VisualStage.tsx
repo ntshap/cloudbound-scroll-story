@@ -439,10 +439,28 @@ export function VisualStage({
       setReady(true)
       needsRender.current = true
       if (!lightweight) {
-        void store
-          .load(1)
-          .then(() => store.decodeWindow(1, transitions[1].frameStart, 8))
-          .catch(() => undefined)
+        // Warm every remaining sequence in the background, in order, rather than
+        // only the next one on arrival. Sequence 1 used to be the only one with
+        // a head start — it downloaded while the visitor read the hero — so the
+        // later transitions began fetching only once they were already on
+        // screen and never caught up. Downloading them all up front is the
+        // difference between "usually works" and "always works": the bytes are
+        // compressed blobs, retained for the session, and cost a fraction of
+        // what the decoded bitmaps do.
+        void (async () => {
+          for (let index = 1; index < transitions.length; index += 1) {
+            if (cancelled) return
+            try {
+              await store.load(index)
+              if (cancelled) return
+              // Only the sequence about to be entered needs bitmaps ready; the
+              // rest decode on demand from bytes that are already local.
+              if (index === 1) await store.decodeWindow(1, transitions[1].frameStart, 8)
+            } catch {
+              /* a sequence that fails here is retried by the loader on entry */
+            }
+          }
+        })()
       }
       await document.fonts.ready
       if (!cancelled) ScrollTrigger.refresh()

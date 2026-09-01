@@ -23,7 +23,7 @@ export const scenes: readonly Scene[] = [
     titleLines: ['A Village', 'Above the Clouds'],
     italicPhrase: 'Clouds',
     description: 'At first light, the rooftops wake and small promises rise into the blue.',
-    still: '/assets/stills/01-hero.png',
+    still: '/assets/stills/01-hero.webp',
     idle: '/assets/idles/01-hero.mp4',
   },
   {
@@ -35,7 +35,7 @@ export const scenes: readonly Scene[] = [
     title: 'Where Every Table Has a Story',
     titleLines: ['Where Every Table', 'Has a Story'],
     description: 'Recipes, rumours, and old songs pass from hand to hand beneath the rafters.',
-    still: '/assets/stills/02-community-hall.png',
+    still: '/assets/stills/02-community-hall.webp',
     idle: '/assets/idles/02-community-hall.mp4',
   },
   {
@@ -47,7 +47,7 @@ export const scenes: readonly Scene[] = [
     title: 'Crafted by Hand, Powered by Water',
     titleLines: ['Crafted by Hand,', 'Powered by Water'],
     description: 'River-driven gears turn slowly, shaping objects made to outlast their makers.',
-    still: '/assets/stills/03-workshop.png',
+    still: '/assets/stills/03-workshop.webp',
     idle: '/assets/idles/03-workshop.mp4',
   },
   {
@@ -59,7 +59,7 @@ export const scenes: readonly Scene[] = [
     title: 'Life Beneath the Roots',
     titleLines: ['Life Beneath', 'the Roots'],
     description: 'Below the oldest tree, patient hands tend the quiet work of growing.',
-    still: '/assets/stills/04-root-garden.png',
+    still: '/assets/stills/04-root-garden.webp',
     idle: '/assets/idles/04-root-garden.mp4',
   },
   {
@@ -71,7 +71,7 @@ export const scenes: readonly Scene[] = [
     title: 'The Way Home',
     titleLines: ['The Way', 'Home'],
     description: 'At golden hour, every path across the valley begins to feel like home.',
-    still: '/assets/stills/05-sunset.png',
+    still: '/assets/stills/05-sunset.webp',
     idle: '/assets/idles/05-sunset.mp4',
   },
 ] as const
