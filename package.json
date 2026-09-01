@@ -5,7 +5,7 @@
   "type": "module",
   "scripts": {
     "dev": "vite --host",
-    "build": "tsc -b && vite build && cp server.mjs dist/index.js",
+    "build": "tsc -b && vite build && find dist/public/assets -type f -name '*.mp4' -delete && cp server.mjs dist/index.js",
     "check": "tsc -b",
     "preview": "vite preview",
     "start": "node dist/index.js",

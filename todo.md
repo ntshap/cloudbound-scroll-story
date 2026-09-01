@@ -34,3 +34,12 @@
 - [x] Search Cloudbound source and the deployed production bundle for any Amplitude SDK, endpoint, or analytics configuration reference; no matches exist.
 - [x] Verify there is no Cloudbound-owned Amplitude integration to remove and that the requests are injected by the Manus edge dispatcher/editor runtime.
 - [x] Confirm the public Cloudbound deployment has no application-owned network failures and document that the invalid platform analytics key must be corrected by Manus rather than application code.
+- [x] Rewrite GitHub `main` to replacement commit `57e39d55548bac90785b8b44a810f63c0203ba37`, whose tree is exactly `003c9318c582dc3906186f3ce95d2a3124723e41` and sole parent is `012e09849402564262cb5835f5b3bef02c5265dd`.
+- [x] Confirm the replacement working tree is identical to `d248ae8`: 326 optimized files, 66,548,764 bytes, largest file 894,582 bytes, five WebP stills, nine MP4s, and 312 transition frames.
+- [x] Preserve `src/lib/assetLoading.ts`, `FrameSequenceStore`, `VisualStage`, scene references, and every media byte exactly from the approved tree.
+- [x] Keep the 326 optimized files committed under `public/assets/` while excluding only MP4 copies from `dist/public` so the platform static edge cannot swallow Range headers.
+- [x] Serve canonical MP4 paths from the committed `public/assets/` disk files through the existing generic static server, without `serveManagedVideo`, Managed File Storage, presigned URLs, downloads, re-encoding, or path changes.
+- [x] Pass six Vitest checks, TypeScript validation, the production build, all 326 local content-type checks, and all nine local MP4 byte-range checks.
+- [ ] Rebuild, redeploy, and re-audit all 326 canonical URLs for HTTP 200/correct content types and all nine MP4s for HTTP 206/valid `Content-Range`.
+- [ ] Verify all four transitions play completely forward and backward using the unchanged `d248ae8` loader code.
+- [ ] Report replacement commit `57e39d55548bac90785b8b44a810f63c0203ba37`, the deployment checkpoint, and exhaustive live results.

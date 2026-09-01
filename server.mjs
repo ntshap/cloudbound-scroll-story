@@ -2,9 +2,11 @@ import { createReadStream } from 'node:fs'
 import { stat } from 'node:fs/promises'
 import { createServer } from 'node:http'
 import path from 'node:path'
-import { fileURLToPath } from 'node:url'
+import { fileURLToPath, pathToFileURL } from 'node:url'
 
-const root = path.join(path.dirname(fileURLToPath(import.meta.url)), 'public')
+const moduleDirectory = path.dirname(fileURLToPath(import.meta.url))
+const root = path.join(moduleDirectory, 'public')
+const sourceAssetsRoot = path.resolve(moduleDirectory, '..', 'public', 'assets')
 const port = Number(process.env.PORT || 3000)
 const mime = new Map([
   ['.css', 'text/css; charset=utf-8'],
@@ -19,7 +21,7 @@ const mime = new Map([
   ['.webp', 'image/webp'],
 ])
 
-async function serveFile(absolute, request, response) {
+export async function serveFile(absolute, request, response) {
   try {
     const info = await stat(absolute)
     if (!info.isFile()) return false
@@ -55,10 +57,14 @@ async function serveFile(absolute, request, response) {
   }
 }
 
-createServer(async (request, response) => {
+async function handleRequest(request, response) {
   try {
     const requestPath = new URL(request.url || '/', 'http://localhost').pathname
     const relative = decodeURIComponent(requestPath).replace(/^\/+/, '')
+    if (relative.startsWith('assets/') && relative.endsWith('.mp4')) {
+      const sourceCandidate = path.resolve(sourceAssetsRoot, relative.slice('assets/'.length))
+      if (sourceCandidate.startsWith(`${sourceAssetsRoot}${path.sep}`) && (await serveFile(sourceCandidate, request, response))) return
+    }
     const candidate = path.resolve(root, relative || 'index.html')
     if (!candidate.startsWith(root)) {
       response.writeHead(400).end('Invalid path')
@@ -70,6 +76,10 @@ createServer(async (request, response) => {
     console.error(error)
     response.writeHead(500).end('Internal server error')
   }
-}).listen(port, () => {
-  console.log(`Cloudbound server listening on port ${port}`)
-})
+}
+
+if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) {
+  createServer(handleRequest).listen(port, () => {
+    console.log(`Cloudbound server listening on port ${port}`)
+  })
+}
